@@ -1,4 +1,5 @@
 
+
 import java.util.Scanner;
 
 public class Main {
@@ -7,5 +8,7 @@ public class Main {
         Menu menu = new Menu(scanner);
         menu.runMenu();
         scanner.close();
-}
+
+    }
+
 }

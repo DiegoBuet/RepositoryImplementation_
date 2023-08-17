@@ -1,4 +1,6 @@
-import java.util.Scanner;
+
+
+import java.util.*;
 
 public class MenuUtils {
     private final Scanner scanner;
@@ -23,9 +25,7 @@ public class MenuUtils {
         return stock;
     }
 
-    public <T> T createNewElement(ElementCreator<T> creator) {
-        return creator.create(scanner);
-    }
+
 
     @FunctionalInterface
     interface ElementCreator<T> {
@@ -61,7 +61,32 @@ public class MenuUtils {
         System.out.print("Enter last name: ");
         String lastName = scanner.nextLine();
 
-        return new User(username, firstName, lastName);
+        String domain;
+        do {
+            System.out.print("Enter domain: ");
+            domain = scanner.nextLine();
+
+            if (isValidDomain(domain)) {
+                break;
+            } else {
+                System.out.println("Invalid domain format. Try again.");
+            }
+        } while (true);
+
+        User user = new User(username, firstName, lastName);
+        user.setDomain(domain);
+        return user;
     }
+
+
+
+    public boolean isValidDomain(String domain) {
+        int atSymbolIndex = domain.indexOf('@');
+        int dotSymbolIndex = domain.lastIndexOf('.');
+        return atSymbolIndex >= 0 && dotSymbolIndex > atSymbolIndex;
+    }
+
+
+
 }
 

@@ -1,4 +1,8 @@
+
+
 import java.util.Scanner;
+import java.util.Set;
+
 
 public class Menu {
     private Scanner scanner;
@@ -9,10 +13,10 @@ public class Menu {
 
     public Menu(Scanner scanner) {
         this.scanner = scanner;
-        this.productRepository = new ListRepository<>();
-        this.countryRepository = new ListRepository<>();
-        this.userRepository = new ListRepository<>();
         this.menuUtils = new MenuUtils(scanner);
+        this.productRepository = new ListRepository<>(menuUtils);
+        this.countryRepository = new ListRepository<>(menuUtils);
+        this.userRepository = new ListRepository<>(menuUtils);
     }
 
     public void printMainMenu() {
@@ -35,34 +39,40 @@ public class Menu {
             printMainMenu();
             option = getOption();
             switch (option) {
-                case "1" -> handleProductOperations();
+                case "1" -> handleUserOperations();
                 case "2" -> handleCountryOperations();
-                case "3" -> handleUserOperations();
+                case "3" -> handleProductOperations();
                 case "0" -> System.out.println("Exiting.");
                 default -> System.out.println("Invalid option. Try again.");
             }
         } while (!option.equals("0"));
     }
 
+    public void handleUserOperations() {
+        EntityHandler<User> entityHandler = new EntityHandler<>(userRepository, scanner, menuUtils::createUser, this);
+        boolean backToMenu = entityHandler.handleEntityOperations("User");
+
+        if (!backToMenu) {
+            Set<String> domains = userRepository.getDomains();
+            System.out.println("Unique domains: " + domains);
+        }
+    }
+
+    public void handleCountryOperations() {
+        EntityHandler<Country> entityHandler = new EntityHandler<>(countryRepository, scanner, menuUtils::createCountry, this);
+        entityHandler.handleEntityOperations("Country");
+    }
+
     public void handleProductOperations() {
-        EntityHandler<Product> entityHandler = new EntityHandler<>(productRepository, scanner, menuUtils::createProduct, this); // Pasar "this" como referencia al objeto Menu
+        EntityHandler<Product> entityHandler = new EntityHandler<>(productRepository, scanner, menuUtils::createProduct, this);
         boolean backToMenu;
         do {
             backToMenu = entityHandler.handleEntityOperations("Product");
             if (!backToMenu) {
-                int totalStock = productRepository.stream().mapToInt(Product::stock).sum();
+                int totalStock = productRepository.calculateTotalStock();
                 System.out.println("Total stock: " + totalStock);
             }
         } while (!backToMenu);
     }
 
-    public void handleCountryOperations() {
-        EntityHandler<Country> entityHandler = new EntityHandler<>(countryRepository, scanner, menuUtils::createCountry, this); // Pasar "this" como referencia al objeto Menu
-        entityHandler.handleEntityOperations("Country");
-    }
-
-    public void handleUserOperations() {
-        EntityHandler<User> entityHandler = new EntityHandler<>(userRepository, scanner, menuUtils::createUser, this); // Pasar "this" como referencia al objeto Menu
-        entityHandler.handleEntityOperations("User");
-    }
 }
